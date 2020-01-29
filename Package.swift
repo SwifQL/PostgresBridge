@@ -51,6 +51,6 @@ let package = Package(
     dependencies: deps.map { $0.package },
     targets: [
         .target(name: "PostgresBridge", dependencies: deps.flatMap { $0.targets }),
-//        .testTarget(name: "PostgresBridgeTests", dependencies: ["PostgresBridge"]),
+        .testTarget(name: "PostgresBridgeTests", dependencies: ["PostgresBridge"]),
     ]
 )
