@@ -13,6 +13,12 @@ extension BridgesApplication {
     }
 }
 
+extension BridgesRequest {
+    public var postgres: PostgresBridge {
+        bridgesApplication.postgres
+    }
+}
+
 import NIO
 import Logging
 
