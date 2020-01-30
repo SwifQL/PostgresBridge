@@ -14,7 +14,7 @@ extension DatabaseHost {
         let host = ProcessInfo.processInfo.environment["PG_HOST"] ?? "127.0.0.1"
         let port = Int(ProcessInfo.processInfo.environment["PG_PORT"] ?? "5432")
         let user = ProcessInfo.processInfo.environment["PG_USER"] ?? "postgres"
-        let pwd = ProcessInfo.processInfo.environment["PG_PWD"] ?? ""
+        let pwd = ProcessInfo.processInfo.environment["PG_PWD"]
         return .init(hostname: host, username: user, password: pwd, port: port ?? 5432, tlsConfiguration: nil)
     }
     
