@@ -9,21 +9,21 @@ import Bridges
 
 extension BridgesApplication {
     public var postgres: PostgresBridge {
-        bridges.bridge(to: PostgresBridge.self)
+        .init(bridges.bridge(to: _PostgresBridge.self, on: eventLoopGroup.next()))
     }
 }
 
 extension BridgesRequest {
     public var postgres: PostgresBridge {
-        bridgesApplication.postgres
+        .init(bridgesApplication.bridges.bridge(to: _PostgresBridge.self, on: eventLoop))
     }
 }
 
 import NIO
 import Logging
 
-extension PostgresBridge {
+extension _PostgresBridge {
     public static func create(eventLoopGroup: EventLoopGroup, logger: Logger) -> AnyBridge {
-        PostgresBridge(eventLoopGroup: eventLoopGroup, logger: logger)
+        _PostgresBridge(eventLoopGroup: eventLoopGroup, logger: logger)
     }
 }
