@@ -56,7 +56,6 @@ public final class PostgresDataDecoder {
         }
 
         func unkeyedContainer() throws -> UnkeyedDecodingContainer {
-            print(self.data.type)
             guard let data = self.data.array else {
                 throw Error.unexpectedDataType(self.data.type, expected: "array")
             }
