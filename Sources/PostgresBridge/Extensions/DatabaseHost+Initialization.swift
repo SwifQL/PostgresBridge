@@ -44,5 +44,16 @@ extension DatabaseHost {
         
         self.init(hostname: hostname, port: port, username: username, password: password, tlsConfiguration: tlsConfiguration)
     }
+    
+    public init(
+        unixDomainSocketPath: String,
+        username: String,
+        password: String,
+        database: String
+    ) {
+        let address = {
+            try SocketAddress.init(unixDomainSocketPath: unixDomainSocketPath)
+        }
+        self.init(address: address, username: username, password: password, tlsConfiguration: nil)
     }
 }
