@@ -12,6 +12,7 @@ public final class PostgresDataDecoder {
 
     public init(json: JSONDecoder = JSONDecoder()) {
         self.jsonDecoder = json
+        self.jsonDecoder.dateDecodingStrategy = .formatted(BridgesDateFormatter())
     }
 
     public func decode<T>(_ type: T.Type, from data: PostgresData) throws -> T
