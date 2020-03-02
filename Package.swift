@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 import PackageDescription
 import Foundation
 
@@ -30,12 +30,12 @@ extension Array where Element == Dep {
 
 var deps: [Dep] = []
 
-deps.append("https://github.com/vapor/postgres-nio.git", from: "1.0.0-beta.2", targets: "PostgresNIO")
+deps.append("https://github.com/vapor/postgres-nio.git", from: "1.0.0-rc", targets: .product(name: "PostgresNIO", package: "postgres-nio"))
 
 if localDev {
     deps.appendLocal("Bridges", targets: "Bridges")
 } else {
-    deps.append("https://github.com/SwifQL/Bridges.git", from: "1.0.0-beta.2", targets: "Bridges")
+    deps.append("https://github.com/SwifQL/Bridges.git", from: "1.0.0-rc", targets: .product(name: "Bridges", package: "Bridges"))
 }
 
 // MARK: - Package
@@ -43,7 +43,7 @@ if localDev {
 let package = Package(
     name: "PostgresBridge",
     platforms: [
-       .macOS(.v10_14)
+       .macOS(.v10_15)
     ],
     products: [
         .library(name: "PostgresBridge", targets: ["PostgresBridge"]),
@@ -51,6 +51,8 @@ let package = Package(
     dependencies: deps.map { $0.package },
     targets: [
         .target(name: "PostgresBridge", dependencies: deps.flatMap { $0.targets }),
-        .testTarget(name: "PostgresBridgeTests", dependencies: ["PostgresBridge"]),
+        .testTarget(name: "PostgresBridgeTests", dependencies: [
+            .target(name: "PostgresBridge")
+        ]),
     ]
 )
