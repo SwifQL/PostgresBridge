@@ -49,25 +49,9 @@ final class _PostgresBridge: Bridgeable {
     
     /// Gives a connection to the database and closes it automatically in both success and error cases
     func connection<T>(to db: DatabaseIdentifier,
-                                           on eventLoop: EventLoop,
-                                           _ closure: @escaping (PostgresConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
-        self.db(db, on: eventLoop).withConnection { conn in
-            closure(conn).flatMap { result in
-                if conn.isClosed {
-                    return conn.eventLoop.future(result)
-                } else {
-                    return conn.close().transform(to: result)
-                }
-            }.flatMapError { error in
-                if conn.isClosed {
-                    return conn.close().flatMapThrowing {
-                        throw error
-                    }
-                } else {
-                    return conn.eventLoop.makeFailedFuture(error)
-                }
-            }
-        }
+                                  on eventLoop: EventLoop,
+                                  _ closure: @escaping (PostgresConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
+        self.db(db, on: eventLoop).withConnection { closure($0) }
     }
     
     func db(_ db: DatabaseIdentifier, on eventLoop: EventLoop) -> PostgresDatabase {
