@@ -17,6 +17,6 @@ extension SwifQLable {
         } catch {
             return conn.eventLoop.makeFailedFuture(error)
         }
-        return conn.query(prepared.query, binds)
+        return conn.query(prepared.query, binds).map { $0.rows }
     }
 }

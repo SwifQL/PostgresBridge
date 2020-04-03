@@ -20,7 +20,7 @@ extension PostgresConnection: BridgeConnection {
     }
     
     public func query<V: Decodable>(raw: String, decoding type: V.Type) -> EventLoopFuture<[V]> {
-        query(raw).all(decoding: type)
+        query(raw).map { $0.rows }.all(decoding: type)
     }
     
     public func query<V>(sql: SwifQLable, decoding type: V.Type) -> EventLoopFuture<[V]> where V : Decodable {
