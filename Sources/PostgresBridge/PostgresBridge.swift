@@ -25,8 +25,8 @@ public struct PostgresBridge {
         context.bridge.register(db)
     }
     
-    public func migrator(for db: DatabaseIdentifier) -> Migrator {
-        BridgeDatabaseMigrations<_PostgresBridge>(context.bridge, db: db)
+    public func migrator(for db: DatabaseIdentifier, dedicatedSchema: Bool = false) -> Migrator {
+        BridgeDatabaseMigrations<_PostgresBridge>(context.bridge, db: db, dedicatedSchema: dedicatedSchema)
     }
 }
 
