@@ -4,10 +4,10 @@ import AsyncKit
 import Bridges
 import Logging
 
-public struct PostgresBridge {
-    let context: BridgeWithContext<_PostgresBridge>
+public struct PostgresBridge: ContextBridgeable {
+    public let context: BridgeWithContext<PBR>
     
-    init (_ context: BridgeWithContext<_PostgresBridge>) {
+    init (_ context: BridgeWithContext<PBR>) {
         self.context = context
     }
     
@@ -26,35 +26,35 @@ public struct PostgresBridge {
     }
     
     public func migrator(for db: DatabaseIdentifier, dedicatedSchema: Bool = false) -> Migrator {
-        BridgeDatabaseMigrations<_PostgresBridge>(context.bridge, db: db, dedicatedSchema: dedicatedSchema)
+        BridgeDatabaseMigrations<PBR>(context.bridge, db: db, dedicatedSchema: dedicatedSchema)
     }
 }
 
-final class _PostgresBridge: Bridgeable {
-    typealias Source = PostgresConnectionSource
-    typealias Database = PostgresDatabase
-    typealias Connection = PostgresConnection
+public final class PBR: Bridgeable {
+    public typealias Source = PostgresConnectionSource
+    public typealias Database = PostgresDatabase
+    public typealias Connection = PostgresConnection
     
-    static var dialect: SQLDialect { .psql }
+    public static var dialect: SQLDialect { .psql }
     
-    var pools: [String: GroupPool] = [:]
+    public var pools: [String: GroupPool] = [:]
     
-    let logger: Logger
-    let eventLoopGroup: EventLoopGroup
+    public let logger: Logger
+    public let eventLoopGroup: EventLoopGroup
     
-    required init (eventLoopGroup: EventLoopGroup, logger: Logger) {
+    public required init (eventLoopGroup: EventLoopGroup, logger: Logger) {
         self.eventLoopGroup = eventLoopGroup
         self.logger = logger
     }
     
     /// Gives a connection to the database and closes it automatically in both success and error cases
-    func connection<T>(to db: DatabaseIdentifier,
+    public func connection<T>(to db: DatabaseIdentifier,
                                   on eventLoop: EventLoop,
                                   _ closure: @escaping (PostgresConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         self.db(db, on: eventLoop).withConnection { closure($0) }
     }
     
-    func db(_ db: DatabaseIdentifier, on eventLoop: EventLoop) -> PostgresDatabase {
+    public func db(_ db: DatabaseIdentifier, on eventLoop: EventLoop) -> PostgresDatabase {
         _ConnectionPoolPostgresDatabase(pool: pool(db, for: eventLoop), logger: logger)
     }
     
