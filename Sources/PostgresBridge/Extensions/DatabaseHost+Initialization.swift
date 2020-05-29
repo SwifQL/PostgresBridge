@@ -15,7 +15,11 @@ extension DatabaseHost {
         let port = Int(ProcessInfo.processInfo.environment["PG_PORT"] ?? "5432")
         let user = ProcessInfo.processInfo.environment["PG_USER"] ?? "postgres"
         let pwd = ProcessInfo.processInfo.environment["PG_PWD"]
-        return .init(hostname: host, port: port ?? 5432, username: user, password: pwd, tlsConfiguration: nil)
+        var sslRequired = false
+        if let tls = ProcessInfo.processInfo.environment["PG_SSL"] {
+            sslRequired = ["1", "true", "require"].contains(tls.lowercased())
+        }
+        return .init(hostname: host, port: port ?? 5432, username: user, password: pwd, tlsConfiguration: sslRequired ? TLSConfiguration.forClient() : nil)
     }
     
     public init?(url: URL) {
@@ -49,11 +53,12 @@ extension DatabaseHost {
         unixDomainSocketPath: String,
         username: String,
         password: String,
-        database: String
+        database: String,
+        tlsConfiguration: TLSConfiguration? = nil
     ) {
         let address = {
             try SocketAddress.init(unixDomainSocketPath: unixDomainSocketPath)
         }
-        self.init(address: address, username: username, password: password, tlsConfiguration: nil)
+        self.init(address: address, username: username, password: password, tlsConfiguration: tlsConfiguration)
     }
 }
