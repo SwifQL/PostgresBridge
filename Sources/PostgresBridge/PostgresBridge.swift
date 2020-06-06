@@ -18,7 +18,7 @@ public struct PostgresBridge: ContextBridgeable {
     }
     
     /// Gives a connection to the database and you should close it by yourself
-    func requestConnection(to db: DatabaseIdentifier) -> EventLoopFuture<PostgresConnection> {
+    public func requestConnection(to db: DatabaseIdentifier) -> EventLoopFuture<PostgresConnection> {
         context.bridge.requestConnection(to: db, on: context.eventLoop)
     }
     
