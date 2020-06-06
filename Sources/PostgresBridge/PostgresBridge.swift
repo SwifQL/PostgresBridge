@@ -11,9 +11,15 @@ public struct PostgresBridge: ContextBridgeable {
         self.context = context
     }
     
+    /// Gives a connection to the database and releases it automatically in both success and error cases
     public func connection<T>(to db: DatabaseIdentifier,
                                             _ closure: @escaping (PostgresConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         context.bridge.connection(to: db, on: context.eventLoop, closure)
+    }
+    
+    /// Gives a connection to the database and you should close it by yourself
+    func requestConnection(to db: DatabaseIdentifier) -> EventLoopFuture<PostgresConnection> {
+        context.bridge.requestConnection(to: db, on: context.eventLoop)
     }
     
     public func transaction<T>(to db: DatabaseIdentifier,
@@ -47,14 +53,23 @@ public final class PBR: Bridgeable {
         self.logger = logger
     }
     
-    /// Gives a connection to the database and closes it automatically in both success and error cases
+    /// Gives a connection to the database and releases it automatically in both success and error cases
     public func connection<T>(to db: DatabaseIdentifier,
                                   on eventLoop: EventLoop,
                                   _ closure: @escaping (PostgresConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         self.db(db, on: eventLoop).withConnection { closure($0) }
     }
     
+    /// Gives a connection to the database and you should close it by yourself
+    public func requestConnection(to db: DatabaseIdentifier, on eventLoop: EventLoop) -> EventLoopFuture<PostgresConnection> {
+        _db(db, on: eventLoop).requestConnection()
+    }
+    
     public func db(_ db: DatabaseIdentifier, on eventLoop: EventLoop) -> PostgresDatabase {
+        _db(db, on: eventLoop)
+    }
+    
+    private func _db(_ db: DatabaseIdentifier, on eventLoop: EventLoop) -> _ConnectionPoolPostgresDatabase {
         _ConnectionPoolPostgresDatabase(pool: pool(db, for: eventLoop), logger: logger)
     }
     
@@ -81,5 +96,9 @@ extension _ConnectionPoolPostgresDatabase: PostgresDatabase {
     
     func withConnection<T>(_ closure: @escaping (PostgresConnection) -> EventLoopFuture<T>) -> EventLoopFuture<T> {
         pool.withConnection(logger: self.logger, closure)
+    }
+    
+    func requestConnection() -> EventLoopFuture<PostgresConnection> {
+        pool.requestConnection(logger: logger)
     }
 }
