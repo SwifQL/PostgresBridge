@@ -4,6 +4,7 @@ public final class PostgresDataEncoder {
     public let json: JSONEncoder
 
     public init(json: JSONEncoder = JSONEncoder()) {
+        json.dateEncodingStrategy = .iso8601
         self.json = json
     }
 
