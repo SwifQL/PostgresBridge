@@ -10,7 +10,7 @@ import SwifQL
 extension SwifQLable {
     @discardableResult
     public func execute(on conn: PostgresConnection) -> EventLoopFuture<[PostgresRow]> {
-        let prepared = prepare(_postgresDialect).splitted
+        let prepared = prepare(.psql).splitted
         let binds: [PostgresData]
         do {
             binds = try prepared.values.map { try PostgresDataEncoder().encode($0) }
