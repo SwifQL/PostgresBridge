@@ -4,6 +4,8 @@ import AsyncKit
 import Bridges
 import Logging
 
+let _postgresDialect: SQLDialect = .psql
+
 public struct PostgresBridge: ContextBridgeable {
     public let context: BridgeWithContext<PBR>
     
@@ -41,7 +43,7 @@ public final class PBR: Bridgeable {
     public typealias Database = PostgresDatabase
     public typealias Connection = PostgresConnection
     
-    public static var dialect: SQLDialect { .psql }
+    public static var dialect: SQLDialect { _postgresDialect }
     
     public var pools: [String: GroupPool] = [:]
     

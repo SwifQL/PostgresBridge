@@ -9,7 +9,7 @@ import Bridges
 import NIO
 
 extension PostgresConnection: BridgeConnection {
-    public var dialect: SQLDialect { .psql }
+    public var dialect: SQLDialect { _postgresDialect }
     
     public func query(raw: String) -> EventLoopFuture<Void> {
         query(raw).transform(to: ())
