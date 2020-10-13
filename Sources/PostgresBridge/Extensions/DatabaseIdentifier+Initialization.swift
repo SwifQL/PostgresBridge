@@ -11,7 +11,11 @@ import Bridges
 extension DatabaseIdentifier {
     /// Initialize identifier based on `PG_DB` environment variable
     public static var psqlEnvironment: DatabaseIdentifier {
-        PostgresDatabaseIdentifier(name: ProcessInfo.processInfo.environment["PG_DB"], host: .psqlEnvironment, maxConnectionsPerEventLoop: 1)
+        var maxConnections: Int = 1
+        if let maxConString = ProcessInfo.processInfo.environment["PG_MAX_CON"], let maxCon = Int(maxConString) {
+            maxConnections = maxCon
+        }
+        return PostgresDatabaseIdentifier(name: ProcessInfo.processInfo.environment["PG_DB"], host: .psqlEnvironment, maxConnectionsPerEventLoop: maxConnections)
     }
     
     public static func psql(name: String? = ProcessInfo.processInfo.environment["PG_DB"], host: DatabaseHost, maxConnectionsPerEventLoop: Int = 1) -> DatabaseIdentifier {
