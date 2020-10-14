@@ -39,6 +39,6 @@ private struct _PostgreSQLRow: SQLRow {
         guard let data = self.row.column(column) else {
             throw _Error.missingColumn(column)
         }
-        return try self.decoder.decode(D.self, from: data)
+        return try self.decoder.decode([column], D.self, from: data)
     }
 }

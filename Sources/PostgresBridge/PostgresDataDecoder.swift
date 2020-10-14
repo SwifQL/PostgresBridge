@@ -15,13 +15,33 @@ public final class PostgresDataDecoder {
         self.jsonDecoder.dateDecodingStrategy = .formatted(BridgesDateFormatter())
     }
 
-    public func decode<T>(_ type: T.Type, from data: PostgresData) throws -> T
+    private struct PostgresCodingKey: CodingKey {
+        init (_ column: String) {
+            stringValue = column
+        }
+        
+        var stringValue: String
+        
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+        
+        var intValue: Int?
+        
+        init?(intValue: Int) {
+            self.intValue = intValue
+            self.stringValue = "\(intValue)"
+        }
+    }
+    
+    public func decode<T>(_ columns: [String], _ type: T.Type, from data: PostgresData) throws -> T
         where T: Decodable
     {
+        
         if let convertible = T.self as? PostgresDataConvertible.Type {
             guard let value = convertible.init(postgresData: data) else {
                 throw DecodingError.typeMismatch(T.self, DecodingError.Context.init(
-                    codingPath: [],
+                    codingPath: columns.map { PostgresCodingKey($0) },
                     debugDescription: "Could not convert to \(T.self): \(data)"
                 ))
             }
