@@ -7,6 +7,62 @@ struct DecoderUnwrapper: Decodable {
     }
 }
 
+protocol PostgresEnumDecodable {
+    init?(postgresData: PostgresData) throws
+}
+extension Array: PostgresEnumDecodable where Element: BridgesEnum, Element.RawValue == String {
+    private struct EnumValue: CodingKey {
+        var stringValue: String
+        var intValue: Int?
+        
+        init (_ str: String) {
+            stringValue = str
+        }
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+        init?(intValue: Int) { nil }
+    }
+
+    init?(postgresData: PostgresData) throws {
+        guard var str = postgresData.string?.replacingOccurrences(of: "\"", with: "") else {
+            throw DecodingError.valueNotFound(String.self, DecodingError.Context.init(
+                codingPath: [],
+                debugDescription: "Unable to proceed \(Element.self) enum :("
+            ))
+        }
+        str.removeFirst(22)
+        var values: [String] = []
+        while true {
+            guard let length = str.first?.asciiValue else {
+                break
+            }
+            str.removeFirst(1)
+            guard str.count >= Int(length) else {
+                break
+            }
+            let startIndex = str.index(str.startIndex, offsetBy: 0)
+            let endIndex = str.index(str.startIndex, offsetBy: Int(length))
+            let substring = str[startIndex..<endIndex]
+            let value = String(substring)
+            guard value.count > 0 else {
+                continue
+            }
+            values.append(value)
+            str.removeFirst(Int(length))
+        }
+        self = try values.map { value in
+            guard let v = Element.init(rawValue: value) else {
+                throw DecodingError.valueNotFound(String.self, DecodingError.Context.init(
+                    codingPath: [EnumValue(value)],
+                    debugDescription: "Looks like \(Element.self) doesn't have \(value) case"
+                ))
+            }
+            return v
+        }
+    }
+}
+
 public final class PostgresDataDecoder {
     public let jsonDecoder: JSONDecoder
 
@@ -37,7 +93,15 @@ public final class PostgresDataDecoder {
     public func decode<T>(_ columns: [String], _ type: T.Type, from data: PostgresData) throws -> T
         where T: Decodable
     {
-        
+        if let convertible = T.self as? PostgresEnumDecodable.Type {
+            guard let value = try convertible.init(postgresData: data) else {
+                throw DecodingError.typeMismatch(T.self, DecodingError.Context.init(
+                    codingPath: columns.map { PostgresCodingKey($0) },
+                    debugDescription: "Could not convert to \(T.self): \(data)"
+                ))
+            }
+            return value as! T
+        }
         if let convertible = T.self as? PostgresDataConvertible.Type {
             guard let value = convertible.init(postgresData: data) else {
                 throw DecodingError.typeMismatch(T.self, DecodingError.Context.init(
