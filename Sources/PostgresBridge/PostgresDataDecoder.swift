@@ -63,6 +63,9 @@ extension Array: PostgresEnumDecodable where Element: BridgesEnum, Element.RawVa
     }
 }
 
+/// Original credits to
+/// [Vapor/Postgres-Kit](https://github.com/vapor/postgres-kit/blob/master/Sources/PostgresKit/PostgresDataDecoder.swift)
+
 public final class PostgresDataDecoder {
     public let jsonDecoder: JSONDecoder
 

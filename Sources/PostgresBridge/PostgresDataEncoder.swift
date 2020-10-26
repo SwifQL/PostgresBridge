@@ -1,5 +1,8 @@
 import Foundation
 
+/// Original credits to
+/// [Vapor/Postgres-Kit](https://github.com/vapor/postgres-kit/blob/master/Sources/PostgresKit/PostgresDataEncoder.swift)
+
 public final class PostgresDataEncoder {
     public let json: JSONEncoder
 
