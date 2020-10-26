@@ -31,6 +31,10 @@ extension Array: PostgresEnumDecodable where Element: BridgesEnum, Element.RawVa
                 debugDescription: "Unable to proceed \(Element.self) enum :("
             ))
         }
+        guard str.count > 22 else {
+            self = []
+            return
+        }
         str.removeFirst(22)
         var values: [String] = []
         while true {
