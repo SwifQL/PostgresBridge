@@ -20,4 +20,17 @@ extension SwifQLable {
         conn.logger.debug("\(prepared.query) \(binds)")
         return conn.query(prepared.query, binds).map { $0.rows }
     }
+    
+    @discardableResult
+    public func execute(on conn: PostgresConnection) async throws -> [PostgresRow] {
+        let future: EventLoopFuture<[PostgresRow]> = execute(on: conn)
+        return try await withCheckedThrowingContinuation { cont in
+            future.whenSuccess { val in
+                cont.resume(returning: val)
+            }
+            future.whenFailure { error in
+                cont.resume(throwing: error)
+            }
+        }
+    }
 }
