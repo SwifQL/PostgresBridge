@@ -30,7 +30,7 @@ extension Array where Element == Dep {
 
 var deps: [Dep] = []
 
-deps.append("https://github.com/vapor/postgres-nio.git", from: "1.0.0", targets: .product(name: "PostgresNIO", package: "postgres-nio"))
+deps.append("https://github.com/nerzh/postgres-nio.git", .branchItem("main"), targets: .product(name: "PostgresNIO", package: "postgres-nio"))
 
 if localDev {
     deps.appendLocal("Bridges", targets: "Bridges")
