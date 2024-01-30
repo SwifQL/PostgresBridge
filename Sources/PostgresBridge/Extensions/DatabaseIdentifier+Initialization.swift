@@ -50,4 +50,22 @@ public class PostgresDatabaseIdentifier: DatabaseIdentifier, PostgresDatabaseIde
             query.execute(on: conn).map { $0 as [BridgesRow] }
         }
     }
+    
+    public func all<T>(_ table: T.Type, on bridges: AnyBridgesObject) async throws -> [T] where T : SwifQL.Table {
+        try await PostgresBridge(bridges.bridges.bridge(to: B.self, on: bridges.eventLoop)).connection(to: self) { conn in
+            try await T.select.execute(on: conn).all(decoding: T.self)
+        }
+    }
+    
+    public func first<T>(_ table: T.Type, on bridges: AnyBridgesObject) async throws -> T? where T : SwifQL.Table {
+        try await PostgresBridge(bridges.bridges.bridge(to: B.self, on: bridges.eventLoop)).connection(to: self) { conn in
+            try await T.select.execute(on: conn).first(decoding: T.self)
+        }
+    }
+    
+    public func query(_ query: SwifQL.SwifQLable, on bridges: AnyBridgesObject) async throws -> [BridgesRow] {
+        try await PostgresBridge(bridges.bridges.bridge(to: B.self, on: bridges.eventLoop)).connection(to: self) { conn in
+            try await query.execute(on: conn)
+        }
+    }
 }

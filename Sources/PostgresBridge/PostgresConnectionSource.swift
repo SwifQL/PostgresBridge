@@ -32,6 +32,18 @@ public struct PostgresConnectionSource: BridgesPoolSource {
             }.map { conn }
         }
     }
+    
+    public func makeConnection(logger: Logger, on eventLoop: EventLoop) async throws -> PostgresConnection {
+        let future: EventLoopFuture<PostgresConnection> = makeConnection(logger: logger, on: eventLoop)
+        return try await withCheckedThrowingContinuation { continuation in
+            future.whenSuccess { val in
+                continuation.resume(returning: val)
+            }
+            future.whenFailure { error in
+                continuation.resume(throwing: error)
+            }
+        }
+    }
 }
 
 extension PostgresConnection: ConnectionPoolItem {}
