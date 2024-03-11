@@ -27,7 +27,7 @@ public struct PostgresConnectionSource: BridgesPoolSource {
                 password: self.db.host.password,
                 logger: logger
             ).flatMapErrorThrowing { error in
-                _ = conn.close()
+                let _: EventLoopFuture<Void> = conn.close()
                 throw error
             }.map { conn }
         }
